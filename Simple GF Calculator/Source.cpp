@@ -91,21 +91,21 @@ std::bitset<4> GFMult(std::bitset<4> input1, std::bitset<4> input2)
 	std::bitset<5> input1big(input1.to_string()); //expand the inputs to allow for calculations
 	std::bitset<5> input2big(input2.to_string());
 	std::bitset<5> primitive("10011");	// the primitive/irreducible polynomial function in the GF(2^4) field
-	std::bitset<5> one("00001");		// one(1) in binary 
-	std::bitset<5> maxbits("01111");	// sixteen(16) in binary / the max value that can be stored in 4 bits
-	std::bitset<5> productbig("00000");	// the eventual product of the multiplication 
+	std::bitset<5> one("0001");		// one(1) in binary 
+	std::bitset<5> maxbits("1111");	// sixteen(16) in binary / the max value that can be stored in 4 bits
+	std::bitset<5> productbig("0000");	// the eventual product of the multiplication 
 
 	while (input2big.to_ulong()) {
 		if ((input2big & one).to_ulong() == 1) // if b is odd, then add the corresponding a to p (final product = sum of all a's corresponding to odd b's)
 			productbig ^= input1big;				// since we're in GF(2^m), addition is an XOR
 
 		if ((input1big & maxbits).to_ulong() >= 16)	// GF modulo: if input1 >= 16, then it will overflow when shifted left, so reduce
-			input1big = (input1big << 1) ^ primitive;		// XOR with the primitive polynomial x^3 + x + 1 
+			input1big = (input1big << 1) ^ primitive;		// XOR with the primitive polynomial x^4 + x + 1 
 		else
-			input1 <<= 1;	// equivalent to a*2
-		input2 >>= 1;	// equivalent to b // 2
+			input1big <<= 1;	// equivalent to a*2
+		input2big >>= 1;	// equivalent to b // 2
 	}
-	std::bitset<4> product(productbig.to_string);
+	std::bitset<4> product(productbig.to_string());
 	return product;
 
 }
