@@ -65,7 +65,9 @@ int main()
 		case '*':
 			binaryResult = GFMult(binary1, binary2);
 			break;
-
+		case '/':
+			binaryResult = GFDiv(binary1, binary2);
+			break;
 		default:
 			std::cout << "try again using the operators shown" << std::endl;
 			binaryResult = NULL;
@@ -86,44 +88,38 @@ std::bitset<4> GFAdd(std::bitset<4> input1, std::bitset<4> input2)
 
 std::bitset<4> GFMult(std::bitset<4> input1, std::bitset<4> input2)
 {
-	std::bitset<7> input1big(input1.to_string());
-	std::bitset<7> input2big(input2.to_string());
-	std::bitset<7> outputbig;
-	input1big << 3;
+	std::bitset<5> input1big(input1.to_string()); //expand the inputs to allow for calculations
+	std::bitset<5> input2big(input2.to_string());
+	std::bitset<5> primitive("10011");	// the primitive/irreducible polynomial function in the GF(2^4) field
+	std::bitset<5> one("00001");		// one(1) in binary 
+	std::bitset<5> maxbits("01111");	// sixteen(16) in binary / the max value that can be stored in 4 bits
+	std::bitset<5> productbig("00000");	// the eventual product of the multiplication 
 
-	outputbig = input1big ^ input2big;
+	while (input2big.to_ulong()) {
+		if ((input2big & one).to_ulong() == 1) // if b is odd, then add the corresponding a to p (final product = sum of all a's corresponding to odd b's)
+			productbig ^= input1big;				// since we're in GF(2^m), addition is an XOR
 
-	return (input1 ^ input2);
+		if ((input1big & maxbits).to_ulong() >= 16)	// GF modulo: if input1 >= 16, then it will overflow when shifted left, so reduce
+			input1big = (input1big << 1) ^ primitive;		// XOR with the primitive polynomial x^3 + x + 1 
+		else
+			input1 <<= 1;	// equivalent to a*2
+		input2 >>= 1;	// equivalent to b // 2
+	}
+	std::bitset<4> product(productbig.to_string);
+	return product;
+
 }
 
-int galois_shift_multiply(int x, int y)
-{
-	int w = 4;
-	int prod;
-	int i, j, ind;
-	int k;
-	int scratch[33];
+// http://web.eecs.utk.edu/~plank/plank/papers/CS-07-593/
+// http://mathworld.wolfram.com/IrreduciblePolynomial.html
+// http://www.cprogramming.com/tutorial/bitwise_operators.html
+// https://en.wikipedia.org/wiki/Finite_field_arithmetic
+// http://www.doc.ic.ac.uk/~mrh/330tutor/ch04s04.html
 
-	prod = 0;
-	for (i = 0; i < w; i++) {
-		scratch[i] = y;
-		if (y & (1 << (w - 1))) {
-			y = y << 1;
-			y = (y ^ 023) & ((1 << 3) - 1);
-		}
-		else {
-			y = y << 1;
-		}
-	}
-	for (i = 0; i < w; i++) {
-		ind = (1 << i);
-		if (ind & x) {
-			j = 1;
-			for (k = 0; k < w; k++) {
-				prod = prod ^ (j & scratch[i]);
-				j = (j << 1);
-			}
-		}
-	}
-	return prod;
+
+std::bitset<4> GFDiv(std::bitset<4> input1, std::bitset<4> input2)
+{
+	std::bitset<4> result("1111");
+	std::cout << "divide not implemented yet" << std::endl;
+	return result;
 }
